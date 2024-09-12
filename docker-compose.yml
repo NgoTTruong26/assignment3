@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: adonis
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: assignment3db
+    volumes:
+      - db_assignment3:/var/lib/postgresql/data
+
+
+  assignment_3_server:
+    build: ./assignment_3_server
+    container_name: "assignment_3_server"
+    depends_on:
+      - db
+    env_file:
+      - ./assignment_3_server/.env
+    command: ["node","--no-warnings","./bin/server.js"]
+
+
+#    entrypoint: ['/app/startup.sh']
+
+  assignment_3_client:
+    build: ./assignment_3_client
+    container_name: "assignment_3_client"
+    env_file:
+      - ./assignment_3_client/.env.production
+    depends_on:
+      - assignment_3_server
+  proxy:
+    build: ./nginx
+    container_name: "assignment3-portal-proxy"
+    restart: always
+    ports:
+      - "8088:80"
+volumes:
+    db_assignment3:
